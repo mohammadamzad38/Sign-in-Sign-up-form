@@ -2,8 +2,10 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
 import { auth } from "../Firebase.init";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const SignUp = () => {
+  
   const [success, setSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -14,8 +16,6 @@ const SignUp = () => {
     const email = e.target.email.value;
     const password = e.target.password.value;
     const terms = e.target.terms.checked;
-
-    console.log(terms)
 
     setErrorMessage("");
     setSuccess(false);
@@ -100,6 +100,8 @@ const SignUp = () => {
         <div className="form-control mt-6">
           <button className="btn btn-primary">Login</button>
         </div>
+        <p className="text-center py-2">If you haven't account please <Link className="hover:text-green-500 hover:font-bold translate-8" to="/register">Register</Link></p>
+
       </form>
       {errorMessage && (
         <p className="text-red-700 text-center p-2">{errorMessage}</p>

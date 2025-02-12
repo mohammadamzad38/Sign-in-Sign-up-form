@@ -1,6 +1,7 @@
 import React from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../Firebase.init";
+import { Link } from "react-router-dom";
 
 const Register = () => {
   const handleRegister = (event) => {
@@ -18,7 +19,7 @@ const Register = () => {
   return (
     <div className="max-w-md mx-auto my-auto ">
       <h1 className="font-bold text-2xl pb-8">Log-in with Your crediential</h1>
-      <form className="space-y-4" onSubmit={handleRegister}>
+      <form className="space-y-4 items-center" onSubmit={handleRegister}>
         <label className="input input-bordered flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -57,6 +58,7 @@ const Register = () => {
           />
         </label>
         <button className="btn btn-secondary">Submit</button>
+        <p className=" text-center">If you have an account please <Link className="hover:text-green-400 hover:font-bold" to="/login" >Login</Link></p>
       </form>
     </div>
   );
