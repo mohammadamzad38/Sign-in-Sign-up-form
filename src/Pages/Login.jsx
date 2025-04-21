@@ -1,5 +1,9 @@
-import { sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
-import React, { useState } from "react";
+import {
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import React, { useRef, useState } from "react";
 import { auth } from "../Firebase.init";
 import { Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -7,7 +11,8 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 const Login = () => {
   const [success, setSuccess] = useState(false);
   const [loginError, setLoginError] = useState("");
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const emailRef = useRef();
 
   const handleLogIn = (event) => {
     event.preventDefault();
@@ -19,17 +24,30 @@ const Login = () => {
 
     signInWithEmailAndPassword(auth, email, password)
       .then((result) => {
-        console.log(result.user);
-        setSuccess(true);
-        sendEmailVerification(auth?.currentUser)
-        .then(() => {
-          console.log("Verification email sented!")
-        })
+        if (!result.user.emailVerified) {
+          setLoginError("Please verify your email address");
+        } else {
+          setSuccess(true);
+        }
+
+        sendEmailVerification(auth, currentUser).then(() => {
+          console.log("verification email sent");
+        });
       })
       .catch((error) => {
-        console.log(error.message);
         setLoginError(error.message);
       });
+  };
+
+  const handleForgetPassword = () => {
+    const email = emailRef.current.value;
+    if (!email) {
+      console.log("Please provide a valid email address!");
+    } else {
+      sendPasswordResetEmail(auth, email).then(() => {
+        alert("reset email sent, please check your email");
+      });
+    }
   };
   return (
     <div className="hero bg-base-200 min-h-screen">
@@ -53,6 +71,7 @@ const Login = () => {
                 name="email"
                 placeholder="email"
                 className="input input-bordered"
+                ref={emailRef}
                 required
               />
             </div>
@@ -61,24 +80,33 @@ const Login = () => {
                 <span className="label-text">Password</span>
               </label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 placeholder="password"
                 className="input input-bordered"
                 required
               />
-              <label className="label">
+              <label onClick={() => handleForgetPassword()} className="label">
                 <a href="#" className="label-text-alt link link-hover">
                   Forgot password?
                 </a>
               </label>
-              <button className="absolute right-5 top-14" onClick={() => setShowPassword(!showPassword)}>{showPassword ? <FaEyeSlash /> : <FaEye />}</button>
+              <button
+                className="absolute right-5 top-14"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {!showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
             <div className="form-control mt-6">
               <button className="btn btn-primary">Login</button>
             </div>
           </form>
-          <p className="text-center pb-4"><Link to="/signup" className="hover:text-green-300 hover:font-bold">Create your user account</Link></p>
+          <p className="text-center pb-4">
+            <Link to="/signup" className="hover:text-green-300 hover:font-bold">
+              Create your user account
+            </Link>
+          </p>
           {success && (
             <p className="text-green-500 font-bold text-center py-2">
               User login Successfully

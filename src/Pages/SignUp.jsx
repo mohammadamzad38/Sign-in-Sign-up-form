@@ -1,11 +1,13 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import React, { useState } from "react";
 import { auth } from "../Firebase.init";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const SignUp = () => {
-  
   const [success, setSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -21,18 +23,23 @@ const SignUp = () => {
     setSuccess(false);
 
     createUserWithEmailAndPassword(auth, email, password)
-    .then((result) => {
-      console.log(result.user);
-      setSuccess(true);
-    })
-    .catch((error) => {
-      console.log("error", error.message);
-      setErrorMessage(error.message);
-      setSuccess(false);
-    });
-    
-    if(!terms){
-      setErrorMessage("Please Except our terms & conditions")
+      .then((result) => {
+        console.log(result.user)
+        setSuccess(true);
+        sendEmailVerification(auth, currentUser)
+        .then(() => {
+          console.log("verification email sented, please check your email")
+        })
+        
+      })
+      .catch((error) => {
+        console.log("error", error.message);
+        setErrorMessage(error.message);
+        setSuccess(false);
+      });
+
+    if (!terms) {
+      setErrorMessage("Please Except our terms & conditions");
       return;
     }
 
@@ -41,14 +48,13 @@ const SignUp = () => {
       return;
     }
 
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#$%^&*!])[A-Za-z\d@#$%^&*!]{6,}$/;
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#$%^&*!])[A-Za-z\d@#$%^&*!]{6,}$/;
 
     if (!passwordRegex?.test(password)) {
       setErrorMessage("Please fill minimmum charecter");
       return;
     }
-
-   
   };
   return (
     <div className="card bg-base-100 w-full my-20 max-w-sm shrink-0 shadow-2xl relative">
@@ -93,15 +99,28 @@ const SignUp = () => {
         </div>
         <div className="form-control">
           <label className="label justify-start cursor-pointer">
-            <input type="checkbox" name="terms" className="checkbox checkbox-xs" />
-            <span className="label-text ml-2">Accept our terms & conditions</span>
+            <input
+              type="checkbox"
+              name="terms"
+              className="checkbox checkbox-xs"
+            />
+            <span className="label-text ml-2">
+              Accept our terms & conditions
+            </span>
           </label>
         </div>
         <div className="form-control mt-6">
           <button className="btn btn-primary">Login</button>
         </div>
-        <p className="text-center py-2">If you haven't account please <Link className="hover:text-green-500 hover:font-bold translate-8" to="/register">Register</Link></p>
-
+        <p className="text-center py-2">
+          If you haven't account please{" "}
+          <Link
+            className="hover:text-green-500 hover:font-bold translate-8"
+            to="/register"
+          >
+            Register
+          </Link>
+        </p>
       </form>
       {errorMessage && (
         <p className="text-red-700 text-center p-2">{errorMessage}</p>
