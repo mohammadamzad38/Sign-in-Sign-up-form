@@ -1,6 +1,7 @@
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  updateProfile,
 } from "firebase/auth";
 import React, { useState } from "react";
 import { auth } from "../Firebase.init";
@@ -17,34 +18,20 @@ const SignUp = () => {
 
     const email = e.target.email.value;
     const password = e.target.password.value;
+    const name = e.target.name.value;
+    const photo = e.target.photo.value;
     const terms = e.target.terms.checked;
 
     setErrorMessage("");
     setSuccess(false);
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((result) => {
-        console.log(result.user)
-        setSuccess(true);
-        sendEmailVerification(auth, currentUser)
-        .then(() => {
-          console.log("verification email sented, please check your email")
-        })
-        
-      })
-      .catch((error) => {
-        console.log("error", error.message);
-        setErrorMessage(error.message);
-        setSuccess(false);
-      });
-
     if (!terms) {
-      setErrorMessage("Please Except our terms & conditions");
+      setErrorMessage("Please accept our terms & conditions");
       return;
     }
 
-    if (password?.length < 6) {
-      setErrorMessage("Password Should be atleast 6 charecter");
+    if (password?.length < 4) {
+      setErrorMessage("Password should be at least 4 characters.");
       return;
     }
 
@@ -55,6 +42,33 @@ const SignUp = () => {
       setErrorMessage("Please fill minimmum charecter");
       return;
     }
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((result) => {
+        console.log(result.user);
+        setSuccess(true);
+
+        sendEmailVerification(auth.currentUser).then(() => {
+          console.log("Verification email sent");
+          setSuccess(true)
+        });
+
+        const profile = {
+          displayName: name,
+          photoURL: photo,
+        };
+        updateProfile(auth.currentUser, profile)
+          .then(() => {
+            console.log("user profile updated");
+          })
+          .catch((error) => console.log("user profile update error"));
+      })
+      .catch((error) => {
+        console.log("error", error.message);
+
+        setErrorMessage(error.message);
+        setSuccess(false);
+      });
   };
   return (
     <div className="card bg-base-100 w-full my-20 max-w-sm shrink-0 shadow-2xl relative">
@@ -62,6 +76,30 @@ const SignUp = () => {
         Sign Up Now!
       </h1>
       <form onSubmit={handleSignUp} className="card-body">
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Name</span>
+          </label>
+          <input
+            type="text"
+            name="name"
+            placeholder="name"
+            className="input input-bordered"
+            required
+          />
+        </div>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Photo url</span>
+          </label>
+          <input
+            type="text"
+            name="photo"
+            placeholder="photo url"
+            className="input input-bordered"
+            required
+          />
+        </div>
         <div className="form-control">
           <label className="label">
             <span className="label-text">Email</span>
@@ -74,7 +112,7 @@ const SignUp = () => {
             required
           />
         </div>
-        <div className="form-control">
+        <div className="form-control relative">
           <label className="label">
             <span className="label-text">Password</span>
           </label>
@@ -85,17 +123,17 @@ const SignUp = () => {
             className="input input-bordered"
             required
           />
-          <button
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-14 bottom-[205px]"
-          >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </button>
           <label className="label">
             <a href="#" className="label-text-alt link link-hover">
               Forgot password?
             </a>
           </label>
+          <button
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-5 top-14"
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
         </div>
         <div className="form-control">
           <label className="label justify-start cursor-pointer">
@@ -110,7 +148,7 @@ const SignUp = () => {
           </label>
         </div>
         <div className="form-control mt-6">
-          <button className="btn btn-primary">Login</button>
+          <button className="btn btn-primary">Sign in</button>
         </div>
         <p className="text-center py-2">
           If you haven't account please{" "}
@@ -122,12 +160,12 @@ const SignUp = () => {
           </Link>
         </p>
       </form>
-      {errorMessage && (
+      {errorMessage && !success && (
         <p className="text-red-700 text-center p-2">{errorMessage}</p>
       )}
       {success && (
         <p className="text-green-400 font-bold text-center p-2">
-          Successfully Sign-up
+          Successfully Signed Up! Please verify your email.
         </p>
       )}
     </div>
