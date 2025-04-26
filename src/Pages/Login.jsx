@@ -30,8 +30,8 @@ const Login = () => {
           setSuccess(true);
         }
 
-        sendEmailVerification(auth, currentUser).then(() => {
-          console.log("verification email sent");
+        sendEmailVerification(result.user).then(() => {
+          console.log("Verification email sent");
         });
       })
       .catch((error) => {
@@ -40,14 +40,17 @@ const Login = () => {
   };
 
   const handleForgetPassword = () => {
+    // console.log("get email", emailRef.current.value);
     const email = emailRef.current.value;
     if (!email) {
-      console.log("Please provide a valid email address!");
-    } else {
+      alert("Please provide a valid email address!");
+      return;
+    } 
+    
       sendPasswordResetEmail(auth, email).then(() => {
-        alert("reset email sent, please check your email");
+        alert("Please check your email to reset password");
       });
-    }
+    
   };
   return (
     <div className="hero bg-base-200 min-h-screen">
@@ -86,7 +89,11 @@ const Login = () => {
                 className="input input-bordered"
                 required
               />
-              <label onClick={() => handleForgetPassword()} className="label">
+              <label
+                onClick={handleForgetPassword}
+                ref={emailRef}
+                className="label"
+              >
                 <a href="#" className="label-text-alt link link-hover">
                   Forgot password?
                 </a>
